@@ -7,5 +7,12 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libstdc++6 libcurl3-gnutl
 ADD https://download.onlyoffice.com/install/desktop/docbuilder/linux/onlyoffice-documentbuilder_amd64.deb /root/
 RUN dpkg -i /root/onlyoffice-documentbuilder_amd64.deb
 RUN rm -rf /root/onlyoffice-documentbuilder_amd64.deb
+RUN mkdir /app
+COPY app.js /app/app.js
+COPY package.json /app/package.json
+WORKDIR /app
+RUN npm install
+EXPOSE 3000
+CMD [ "node", "app.js" ]
 # docker build -t qhduan/docbuilder .
 # docker run -it --rm --name db -v ${PWD}:/opt/documentbuilder/scripts -w /opt/documentbuilder qhduan/docbuilder onlyoffice-documentbuilder scripts/parser.docbuilder
