@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 
 const app = express()
-const jsonParser = bodyParser.json()
+const jsonParser = bodyParser.json({ limit: '500MB' })
 
 const builderPath = '/opt/onlyoffice/documentbuilder/docbuilder'
 
@@ -28,8 +28,11 @@ function saveFile(docx, script) {
                     child_process.execFile(
                         builderPath,
                         [scriptPath],
-                        { cwd: cwd },
-                        (err, stdout) => {
+                        {
+                            cwd: cwd,
+                            maxBuffer: 1024 * 1024 * 1024,
+                        },
+                        (err, stdout, stderr) => {
                             if (err) return reject(err)
                             console.log('removing tmpdir', cwd)
                             fs.rmdir(cwd, { recursive: true }, (err) => {
@@ -40,7 +43,7 @@ function saveFile(docx, script) {
                                     const jsonStr = stdout.substring(start + 11, end)
                                     resolve(JSON.parse(jsonStr))
                                 } else {
-                                    reject(new Error('Invalid parse output'))
+                                    reject(new Error('Invalid parse output: ' + stdout + stderr))
                                 }
                             })
                         }
